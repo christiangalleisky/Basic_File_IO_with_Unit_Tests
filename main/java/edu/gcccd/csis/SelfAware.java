@@ -2,8 +2,11 @@ package edu.gcccd.csis;
 
 import java.io.*;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class SelfAware implements Language {
+
+    private String[] s = new String[3000];//if an error is thrown while running the program it is likely this array overflowing
 
     public SelfAware (){
         Language.sort();
@@ -18,30 +21,17 @@ public class SelfAware implements Language {
      * source file.
      * @throws Exception not a java file or no file maybe ...
      */
-    public int occurrences(String sourceFile) {
-
-        Scanner inputStream = null;
-        try {
-            inputStream = new Scanner(new File(sourceFile));
-        } catch (FileNotFoundException e) {
-            System.out.println("Error opening the file in the occurrences method!");
-        }
-
-        String[] s = new String[100];
-        int i = 0;
-        while (inputStream.hasNextLine()) {
-            s[i] = inputStream.nextLine();
-            i++;
-        }
-
-        String[][] h = new String[100][25];
-        for (int u = 0; u < i; u++) {
-            h[u] = s[u].split("\\W");
-        }
+    public int occurrences(String sourceFile) throws Exception {
 
         int instances = 0;
-        for (String[] x : h) {
-            for (String y : x) {
+        try(Scanner inputStream = new Scanner(new File(sourceFile))){
+            inputStream.useDelimiter(Pattern.compile("\\W"));
+            int i = 0;
+            while (inputStream.hasNext()) {
+                s[i] = inputStream.next();
+                i++;
+            }
+            for (String y : s) {
                 if (y == null) {
                     continue;
                 }
@@ -51,10 +41,27 @@ public class SelfAware implements Language {
                     }
                 }
             }
+        } catch (FileNotFoundException e) {
+            System.out.println("Error opening the file in the occurrences method!");
         }
-        inputStream.close();
-
         return instances;
+    }
+
+    public void occurrencesFrequency(String sourceFile){
+        
+        for (String z : ReservedWords) {
+            int i = 0;
+            for (String y : s) {
+                if (y == null) {
+                    continue;
+                }else if (z.equals(y)) {
+                    i++;
+                }
+            }
+            if(i != 0){
+                append(sourceFile , "\n//" + z + " occurred " + i + " time(s)");
+            }
+        }
     }
 
     /**
@@ -62,18 +69,14 @@ public class SelfAware implements Language {
      *
      * @param sourceFile {@link String} path to a java source file
      * @param message    {@link String} message to be appended
-     * @throws IOException things didn't go too well ...
      */
-    public void append(String sourceFile, String message) throws IOException {
-        PrintWriter outputStream = null;
-        try {
-            outputStream = new PrintWriter(new FileOutputStream(sourceFile, true));
+    public void append(String sourceFile, String message) {
 
+        try(PrintWriter outputStream = new PrintWriter(new FileOutputStream(sourceFile, true))) {
+            outputStream.print(message);
         } catch (FileNotFoundException e) {
             System.out.println("Something went wrong in your append method with creating the output stream");
         }
-        outputStream.print(message);
-        outputStream.close();
     }
 
     public static void main(String[] args) {
@@ -83,13 +86,14 @@ public class SelfAware implements Language {
                     SelfAware.class.getName().replace(".", File.separator) + ".java";
             SelfAware sa = new SelfAware();
             sa.append(code, "\n//Keyword occurrences: " + sa.occurrences(code));
-        } catch (IOException e) {
-            System.out.println("Something went wrong in your append method");
-            System.out.println(e.getStackTrace());
-            System.exit(-1);
+            sa.occurrencesFrequency(code);//must call method occurrences first before using this method
         } catch (Exception e) {
             System.out.println("Something went wrong in your occurrences method");
-            System.out.println(e.getStackTrace());
+            StackTraceElement[] elements = e.getStackTrace();
+            for(StackTraceElement x : elements){
+                System.out.println("\nClass: " + x.getClassName() + "\nLine Number: " + x.getLineNumber() + " " +
+                                   "\nMethod: " + x.getMethodName() + "\nFile: " + x.getFileName());
+            }
             System.exit(-1);
         }
     }
