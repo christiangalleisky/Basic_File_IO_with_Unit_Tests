@@ -2,11 +2,8 @@ package edu.gcccd.csis;
 
 import java.io.*;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 public class SelfAware implements Language {
-
-    private String[] s = new String[3000];//if an error is thrown while running the program it is likely this array overflowing
 
     public SelfAware (){
         Language.sort();
@@ -25,18 +22,11 @@ public class SelfAware implements Language {
 
         int instances = 0;
         try(Scanner inputStream = new Scanner(new File(sourceFile))){
-            inputStream.useDelimiter(Pattern.compile("\\W"));
-            int i = 0;
+            inputStream.useDelimiter("\\W");
             while (inputStream.hasNext()) {
-                s[i] = inputStream.next();
-                i++;
-            }
-            for (String y : s) {
-                if (y == null) {
-                    continue;
-                }
-                for (String z : ReservedWords) {
-                    if (y.equals(z)) {
+                final String u = inputStream.next();
+                for (String z : ReservedWords){
+                    if(u.equals(z)){
                         instances++;
                     }
                 }
@@ -47,19 +37,24 @@ public class SelfAware implements Language {
         return instances;
     }
 
-    public void occurrencesFrequency(String sourceFile){
-        
-        for (String z : ReservedWords) {
+    public void occurrencesFrequency(String sourceFile) throws Exception {
+        for (String z : ReservedWords){
             int i = 0;
-            for (String y : s) {
-                if (y == null) {
-                    continue;
-                }else if (z.equals(y)) {
-                    i++;
+        try (Scanner inputStream = new Scanner(new File(sourceFile))) {
+            inputStream.useDelimiter("\\W");
+                while (inputStream.hasNext()){
+                    final String y = inputStream.next();
+                    if (y == null || y.equals("")) {
+                        continue;
+                    } else if (z.equals(y) || z.equals("nClass")) {
+                        i++;
+                    }
                 }
-            }
-            if(i != 0){
-                append(sourceFile , "\n//" + z + " occurred " + i + " time(s)");
+                if (i != 0) {
+                    append(sourceFile, "\n//" + z + " occurred " + i + " time(s)");
+                }
+            } catch (FileNotFoundException e) {
+                System.out.println("Error opening the file in the occurrencesFrequency method!");
             }
         }
     }
@@ -74,7 +69,7 @@ public class SelfAware implements Language {
 
         try(PrintWriter outputStream = new PrintWriter(new FileOutputStream(sourceFile, true))) {
             outputStream.print(message);
-        } catch (FileNotFoundException e) {
+        }catch (FileNotFoundException e) {
             System.out.println("Something went wrong in your append method with creating the output stream");
         }
     }
@@ -98,3 +93,4 @@ public class SelfAware implements Language {
         }
     }
 }
+

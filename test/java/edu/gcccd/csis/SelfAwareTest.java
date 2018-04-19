@@ -9,6 +9,10 @@ import java.util.Scanner;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * You must first clean the appendages from running the main method in
+ * SelfAware.java before you can run this test
+ */
 public class SelfAwareTest {
 
     @Before
@@ -22,13 +26,7 @@ public class SelfAwareTest {
     }
 
     /**
-     * After running this test once you must either go back into the source file
-     * "SelfAware.java" and delete the line of code that was appended or
-     * run the @after test that will delete the appendage;
-     * otherwise it will have the wrong number of occurrences in the file
-     * and the test will fail the next time you run it.
-     *
-     * @throws Exception
+     * @throws Exception something went wrong oops!
      */
     @Test
     public void testOccurrenceCounter() throws Exception {
@@ -39,7 +37,7 @@ public class SelfAwareTest {
 
         SelfAware sa = new SelfAware();
 
-        assertEquals(sa.occurrences(sourceFile), 58); //Manually counted amount
+        assertEquals(sa.occurrences(sourceFile), 57); //Manually counted amount
 
         int hold = sa.occurrences(sourceFile);
         sa.append(sourceFile, "\n//Such a fun int to count when thinking only of interface");
@@ -59,7 +57,7 @@ public class SelfAwareTest {
                 SelfAware.class.getName().replace(".", File.separator) + ".java";
 
         System.out.println("The file to have its appendage deleted from is " + sourceFile);
-        String[] s = new String[100];
+        String[] s = new String[400];
         try (Scanner inputStream = new Scanner(new File(sourceFile))) {
             int i = 0;
             while (inputStream.hasNextLine()) {
